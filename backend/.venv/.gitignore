@@ -1,0 +1,48 @@
+# ==============================
+# Python
+# ==============================
+
+backend/.venv/
+**/__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# Database
+*.sqlite3
+db.sqlite3
+
+# Environment variables
+.env
+.env.*
+
+# Media
+media/
+
+# Static files
+staticfiles/
+
+# ==============================
+# React / Node
+# ==============================
+
+frontend/node_modules/
+frontend/dist/
+
+# Logs
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ==============================
+# VS Code
+# ==============================
+
+.vscode/
+
+# ==============================
+# OS
+# ==============================
+
+.DS_Store
+Thumbs.db
