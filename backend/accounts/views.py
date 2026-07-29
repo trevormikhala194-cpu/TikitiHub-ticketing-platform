@@ -12,6 +12,7 @@ from .serializers import (
     RegisterSerializer,
     LoginSerializer,
     ProfileSerializer,
+    LogoutSerializer,
 )
 
 
@@ -65,3 +66,24 @@ class ProfileView(RetrieveUpdateAPIView):
 
     def get_object(self):
         return self.request.user.profile
+
+
+class LogoutView(GenericAPIView):
+    """
+    Logout a user by blacklisting the refresh token.
+    """
+
+    serializer_class = LogoutSerializer
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request):
+        serializer = self.get_serializer(data=request.data)
+        serializer.is_valid(raise_exception=True)
+        serializer.save()
+
+        return Response(
+            {
+                "message": "Logged out successfully."
+            },
+            status=status.HTTP_205_RESET_CONTENT,
+        )

@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'corsheaders',
     'drf_spectacular',
+    'rest_framework_simplejwt.token_blacklist',
 
     # Local Apps
     'accounts.apps.AccountsConfig',
