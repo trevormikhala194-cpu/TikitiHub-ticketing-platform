@@ -1,10 +1,18 @@
 from rest_framework import status
-from rest_framework.generics import CreateAPIView, GenericAPIView
-from rest_framework.permissions import AllowAny
+from rest_framework.generics import (
+    CreateAPIView,
+    GenericAPIView,
+    RetrieveUpdateAPIView,
+)
+from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 
 from .models import User
-from .serializers import RegisterSerializer, LoginSerializer
+from .serializers import (
+    RegisterSerializer,
+    LoginSerializer,
+    ProfileSerializer,
+)
 
 
 class RegisterView(CreateAPIView):
@@ -45,3 +53,15 @@ class LoginView(GenericAPIView):
             serializer.validated_data,
             status=status.HTTP_200_OK,
         )
+
+
+class ProfileView(RetrieveUpdateAPIView):
+    """
+    Retrieve and update the authenticated user's profile.
+    """
+
+    serializer_class = ProfileSerializer
+    permission_classes = [IsAuthenticated]
+
+    def get_object(self):
+        return self.request.user.profile
