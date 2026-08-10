@@ -8,12 +8,22 @@ class CategorySerializer(serializers.ModelSerializer):
     class Meta:
         model = Category
         fields = "__all__"
+        read_only_fields = (
+            "id",
+            "created_at",
+            "updated_at",
+        )
 
 
 class VenueSerializer(serializers.ModelSerializer):
     class Meta:
         model = Venue
         fields = "__all__"
+        read_only_fields = (
+            "id",
+            "created_at",
+            "updated_at",
+        )
 
 
 class EventSerializer(serializers.ModelSerializer):
@@ -25,43 +35,36 @@ class EventSerializer(serializers.ModelSerializer):
         read_only_fields = (
             "id",
             "organizer",
-            "available_tickets",
             "created_at",
             "updated_at",
         )
 
     def validate(self, attrs):
-        start = attrs.get("start_date")
-        end = attrs.get("end_date")
+        start = attrs.get("start_datetime")
+        end = attrs.get("end_datetime")
 
         if start and start < timezone.now():
             raise serializers.ValidationError(
                 "Event cannot start in the past."
             )
 
-        if start and end and end <= start:
+        if start and end <= start:
             raise serializers.ValidationError(
-                "End date must be after the start date."
+                "End time must be after the start time."
             )
 
         return attrs
 
-    def validate_price(self, value):
-        if value < 0:
-            raise serializers.ValidationError(
-                "Price cannot be negative."
-            )
-        return value
-
-    def validate_total_tickets(self, value):
+    def validate_capacity(self, value):
         if value <= 0:
             raise serializers.ValidationError(
-                "Total tickets must be greater than zero."
+                "Capacity must be greater than zero."
             )
         return value
 
-    def create(self, validated_data):
-        validated_data["organizer"] = self.context["request"].user
-        validated_data["available_tickets"] = validated_data["total_tickets"]
-
-        return Event.objects.create(**validated_data)
+    def validate_ticket_price(self, value):
+        if value < 0:
+            raise serializers.ValidationError(
+                "Ticket price cannot be negative."
+            )
+        return value
