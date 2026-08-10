@@ -9,9 +9,9 @@ from .serializers import (
 )
 
 
-# -----------------------
+# -------------------------
 # Categories
-# -----------------------
+# -------------------------
 
 class CategoryListCreateView(generics.ListCreateAPIView):
     queryset = Category.objects.all()
@@ -25,9 +25,9 @@ class CategoryDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
 
-# -----------------------
+# -------------------------
 # Venues
-# -----------------------
+# -------------------------
 
 class VenueListCreateView(generics.ListCreateAPIView):
     queryset = Venue.objects.all()
@@ -41,9 +41,9 @@ class VenueDetailView(generics.RetrieveUpdateDestroyAPIView):
     permission_classes = [IsAuthenticatedOrReadOnly]
 
 
-# -----------------------
+# -------------------------
 # Events
-# -----------------------
+# -------------------------
 
 class EventListCreateView(generics.ListCreateAPIView):
     queryset = Event.objects.all()

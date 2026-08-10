@@ -10,18 +10,16 @@ from .views import (
 )
 
 urlpatterns = [
-
     # Categories
     path(
         "categories/",
         CategoryListCreateView.as_view(),
         name="category-list",
     ),
-
     path(
-        "categories/<int:pk>/",
-        CategoryDetailView.as_view(),
-        name="category-detail",
+    "categories/<int:pk>/",
+    CategoryDetailView.as_view(),
+    name="category-detail",
     ),
 
     # Venues
@@ -30,7 +28,6 @@ urlpatterns = [
         VenueListCreateView.as_view(),
         name="venue-list",
     ),
-
     path(
         "venues/<int:pk>/",
         VenueDetailView.as_view(),
@@ -43,7 +40,6 @@ urlpatterns = [
         EventListCreateView.as_view(),
         name="event-list",
     ),
-
     path(
         "<int:pk>/",
         EventDetailView.as_view(),
