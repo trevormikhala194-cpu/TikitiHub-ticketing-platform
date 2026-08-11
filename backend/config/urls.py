@@ -56,4 +56,9 @@ path(
     "api/tickets/",
     include("tickets.urls"),
 ),
+
+path(
+    "api/bookings/",
+    include("bookings.urls"),
+),
 ]
