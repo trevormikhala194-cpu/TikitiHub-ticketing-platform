@@ -26,6 +26,12 @@ class Ticket(models.Model):
         related_name="tickets",
     )
 
+    booking = models.ForeignKey(
+        "bookings.Booking",
+        on_delete=models.CASCADE,
+        related_name="tickets",
+    )
+
     ticket_number = models.CharField(
         max_length=30,
         unique=True,
@@ -36,6 +42,12 @@ class Ticket(models.Model):
         default=uuid.uuid4,
         unique=True,
         editable=False,
+    )
+
+    qr_image = models.ImageField(
+        upload_to="qr_codes/",
+        blank=True,
+        null=True,
     )
 
     status = models.CharField(
