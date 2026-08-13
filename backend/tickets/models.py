@@ -1,6 +1,6 @@
-import uuid
 import random
 import string
+import uuid
 
 from django.conf import settings
 from django.db import models
@@ -22,6 +22,12 @@ class Ticket(models.Model):
 
     event = models.ForeignKey(
         "events.Event",
+        on_delete=models.CASCADE,
+        related_name="tickets",
+    )
+
+    booking = models.ForeignKey(
+        "bookings.Booking",
         on_delete=models.CASCADE,
         related_name="tickets",
     )

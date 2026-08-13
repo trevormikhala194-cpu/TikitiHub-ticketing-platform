@@ -142,21 +142,63 @@ USE_TZ = True
 
 STATIC_URL = 'static/'
 
+# ==================================================
+# Django REST Framework
+# ==================================================
+
 REST_FRAMEWORK = {
     "DEFAULT_AUTHENTICATION_CLASSES": (
-        "rest_framework.authentication.SessionAuthentication",
-        "rest_framework.authentication.BasicAuthentication",
         "rest_framework_simplejwt.authentication.JWTAuthentication",
     ),
+
     "DEFAULT_PERMISSION_CLASSES": (
         "rest_framework.permissions.IsAuthenticated",
     ),
+
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+
+    "DEFAULT_THROTTLE_CLASSES": (
+        "rest_framework.throttling.UserRateThrottle",
+        "rest_framework.throttling.AnonRateThrottle",
+    ),
+
+    "DEFAULT_THROTTLE_RATES": {
+        "user": "100/min",
+        "anon": "20/min",
+    },
 }
+
+# ==================================================
+# JWT
+# ==================================================
+
 SIMPLE_JWT = {
+
     "ACCESS_TOKEN_LIFETIME": timedelta(minutes=30),
+
     "REFRESH_TOKEN_LIFETIME": timedelta(days=7),
+
     "ROTATE_REFRESH_TOKENS": True,
+
     "BLACKLIST_AFTER_ROTATION": True,
+
     "UPDATE_LAST_LOGIN": True,
 }
+
+# ==================================================
+# Daraja API Configuration
+# ==================================================
+
+DARAJA_CONSUMER_KEY = config("DARAJA_CONSUMER_KEY")
+DARAJA_CONSUMER_SECRET = config("DARAJA_CONSUMER_SECRET")
+
+DARAJA_SECURITY_CREDENTIAL = config(
+    "DARAJA_SECURITY_CREDENTIAL",
+    default=""
+)
+
+DARAJA_SHORTCODE = config("DARAJA_SHORTCODE")
+
+DARAJA_PASSKEY = config("DARAJA_PASSKEY")
+
+DARAJA_CALLBACK_URL = config("DARAJA_CALLBACK_URL")
