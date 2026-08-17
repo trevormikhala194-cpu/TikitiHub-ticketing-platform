@@ -1,5 +1,6 @@
 from django.contrib import admin
 from django.urls import include, path
+
 from rest_framework_simplejwt.views import (
     TokenRefreshView,
     TokenVerifyView,
@@ -46,19 +47,27 @@ urlpatterns = [
         name="swagger-ui",
     ),
 
+    # Events
     path(
-    "api/events/",
-    include("events.urls"),
+        "api/events/",
+        include("events.urls"),
+    ),
 
-),
+    # Tickets
+    path(
+        "api/tickets/",
+        include("tickets.urls"),
+    ),
 
-path(
-    "api/tickets/",
-    include("tickets.urls"),
-),
+    # Bookings
+    path(
+        "api/bookings/",
+        include("bookings.urls"),
+    ),
 
-path(
-    "api/bookings/",
-    include("bookings.urls"),
-),
+    # Payments
+    path(
+        "api/payments/",
+        include("payments.urls"),
+    ),
 ]
