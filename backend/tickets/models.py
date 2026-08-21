@@ -1,8 +1,12 @@
 import random
 import string
 import uuid
+from io import BytesIO
+
+import qrcode
 
 from django.conf import settings
+from django.core.files.base import ContentFile
 from django.db import models
 
 
@@ -83,7 +87,30 @@ class Ticket(models.Model):
                     self.ticket_number = ticket_number
                     break
 
+        is_new = self.pk is None
+
         super().save(*args, **kwargs)
+
+        if is_new and not self.qr_image:
+            qr = qrcode.QRCode(
+                version=1,
+                box_size=10,
+                border=4,
+            )
+
+            qr.add_data(str(self.qr_code))
+            qr.make(fit=True)
+
+            qr_image = qr.make_image()
+
+            buffer = BytesIO()
+            qr_image.save(buffer, format="PNG")
+
+            self.qr_image.save(
+                f"{self.ticket_number}.png",
+                ContentFile(buffer.getvalue()),
+                save=True,
+            )
 
     def __str__(self):
         return self.ticket_number
