@@ -1,0 +1,137 @@
+.auth-page {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: #f7f7f5;
+}
+
+.auth-card {
+  width: 100%;
+  max-width: 440px;
+  padding: 40px;
+  background: #ffffff;
+  border-radius: 24px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.08);
+}
+
+.auth-logo {
+  display: inline-block;
+  margin-bottom: 32px;
+  font-size: 24px;
+  font-weight: 800;
+  color: #111111;
+  text-decoration: none;
+}
+
+.auth-logo span {
+  color: #ff5a1f;
+}
+
+.auth-heading h1 {
+  margin: 0 0 8px;
+  font-size: 32px;
+  color: #111111;
+}
+
+.auth-heading p {
+  margin: 0 0 28px;
+  color: #666666;
+  line-height: 1.6;
+}
+
+.auth-error {
+  margin-bottom: 20px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #fff0ed;
+  color: #c63d16;
+  font-size: 14px;
+}
+
+.auth-form {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
+
+.auth-form label {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  color: #222222;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.auth-form input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 14px 16px;
+  border: 1px solid #dddddd;
+  border-radius: 12px;
+  outline: none;
+  font-size: 16px;
+  background: #ffffff;
+}
+
+.auth-form input:focus {
+  border-color: #ff5a1f;
+  box-shadow: 0 0 0 3px rgba(255, 90, 31, 0.12);
+}
+
+.auth-submit {
+  border: none;
+  border-radius: 12px;
+  padding: 15px;
+  background: #ff5a1f;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.auth-submit:hover {
+  background: #e94d16;
+}
+
+.auth-submit:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.auth-switch {
+  margin: 24px 0 0;
+  text-align: center;
+  color: #666666;
+}
+
+.auth-switch a {
+  color: #ff5a1f;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+@media (max-width: 480px) {
+  .auth-page {
+    padding: 16px;
+  }
+
+  .auth-card {
+    padding: 28px 20px;
+    border-radius: 20px;
+  }
+
+  .auth-heading h1 {
+    font-size: 28px;
+  }
+}
+.auth-success {
+  margin-bottom: 20px;
+  padding: 14px;
+  border-radius: 12px;
+  background: #eefaf2;
+  color: #18753b;
+  font-size: 14px;
+}

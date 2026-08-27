@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { getEvents } from "../services/events";
-import "./Events.css";
 import { Link } from "react-router-dom";
+import { getEvents } from "../services/events";
+import "../styles/Events.css";
 
 function Events() {
   const [events, setEvents] = useState([]);
@@ -20,7 +20,7 @@ function Events() {
         setEvents(publishedEvents);
       } catch (err) {
         console.error("Failed to load events:", err);
-        setError("Unable to load events. Please try again.");
+        setError("Unable to load events right now.");
       } finally {
         setLoading(false);
       }
@@ -53,159 +53,102 @@ function Events() {
     <div className="events-page">
       <section className="events-hero">
         <div>
-          <span className="section-label">
-            DISCOVER
-          </span>
+          <span className="section-label">DISCOVER</span>
 
-          <h1>
-            Find Your Next
-            <br />
-            <span>Experience.</span>
-          </h1>
+          <h1>Find Your Next Experience.</h1>
 
           <p>
-            Discover concerts, sports, festivals,
-            culture and unforgettable experiences
-            happening across Kenya.
+            From live music and sports to festivals, culture and
+            business events — find something worth showing up for.
           </p>
         </div>
       </section>
 
-      <section className="all-events-section">
-        <div className="events-page-heading">
+      <section className="events-container">
+        <div className="events-header">
           <div>
-            <span className="section-label">
-              TIKITIHUB EVENTS
-            </span>
-
-            <h2>
-              Upcoming Events
-            </h2>
+            <span className="section-label">TIKITIHUB EVENTS</span>
+            <h2>All Events</h2>
           </div>
 
           <span className="event-count">
-            {events.length} Events
+            {events.length} events
           </span>
         </div>
 
         {loading && (
           <div className="events-state">
-            <div className="loading-spinner"></div>
-            <p>Loading events...</p>
+            <div className="loader"></div>
+            <p>Finding events for you...</p>
           </div>
         )}
 
         {error && !loading && (
-          <div className="events-state error">
+          <div className="events-state error-state">
+            <h3>Something went wrong</h3>
             <p>{error}</p>
-
-            <button
-              onClick={() => window.location.reload()}
-            >
-              Try Again
-            </button>
           </div>
         )}
 
-        {!loading &&
-          !error &&
-          events.length === 0 && (
-            <div className="events-state">
-              <div className="empty-icon">
-                🎟
-              </div>
+        {!loading && !error && events.length === 0 && (
+          <div className="events-state">
+            <h3>No events available</h3>
+            <p>
+              There are currently no published events.
+              Check back soon.
+            </p>
+          </div>
+        )}
 
-              <h3>
-                No upcoming events
-              </h3>
+        {!loading && !error && events.length > 0 && (
+          <div className="events-grid">
+            {events.map((event, index) => (
+              <article className="event-card-page" key={event.id}>
+                <div className={`event-cover event-cover-${(index % 4) + 1}`}>
+                  <span className="event-type">EVENT</span>
 
-              <p>
-                There are no published events available
-                right now. Check back soon.
-              </p>
-            </div>
-          )}
+                  <div className="event-cover-icon">
+                    🎟
+                  </div>
+                </div>
 
-        {!loading &&
-          !error &&
-          events.length > 0 && (
-            <div className="events-page-grid">
-              {events.map((event) => (
-                <article
-                  className="large-event-card"
-                  key={event.id}
-                >
-                  <div className="large-event-image">
-                    {event.banner_image ? (
-                      <img
-                        src={event.banner_image}
-                        alt={event.title}
-                      />
-                    ) : (
-                      <div className="event-image-placeholder">
-                        <span>🎟</span>
-                        <small>
-                          TIKITIHUB EVENT
-                        </small>
-                      </div>
-                    )}
+                <div className="event-card-content">
+                  <span className="event-date">
+                    {formatDate(event.start_datetime)}
+                  </span>
 
-                    <span className="event-type">
-                      EVENT
-                    </span>
+                  <h3>{event.title}</h3>
+
+                  <p>
+                    {event.description ||
+                      "Experience an unforgettable event with TikitiHub."}
+                  </p>
+
+                  <div className="event-meta">
+                    <span>📍 Kenya</span>
+                    <span>👥 {event.capacity} capacity</span>
                   </div>
 
-                  <div className="large-event-body">
-                    <p className="event-date">
-                      {formatDate(
-                        event.start_datetime
-                      )}
-                    </p>
-
-                    <h3>
-                      {event.title}
-                    </h3>
-
-                    <p className="event-description">
-                      {event.description ||
-                        "Experience an unforgettable event."}
-                    </p>
-
-                    <div className="large-event-meta">
-                      <span>
-                        📍 Kenya
-                      </span>
-
-                      <span>
-                        👥 {event.capacity} capacity
-                      </span>
+                  <div className="event-card-footer">
+                    <div>
+                      <small>FROM</small>
+                      <strong>
+                        {formatPrice(event.ticket_price)}
+                      </strong>
                     </div>
 
-                    <div className="large-event-footer">
-                      <div>
-                        <small>
-                          FROM
-                        </small>
-
-                        <strong>
-                          {formatPrice(
-                            event.ticket_price
-                          )}
-                        </strong>
-                      </div>
-
-                      <Link
+                    <Link
                       to={`/events/${event.id}`}
-                      className="view-event-button"
-                     >
+                      className="event-view-btn"
+                    >
                       View Event →
-                     </Link>
-                    </div>
+                    </Link>
                   </div>
-                </article>
-              ))}
-            </div>
-          )}
+                </div>
+              </article>
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );

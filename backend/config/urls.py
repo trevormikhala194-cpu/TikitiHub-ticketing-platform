@@ -1,6 +1,6 @@
-from django.contrib import admin
 from django.conf import settings
 from django.conf.urls.static import static
+from django.contrib import admin
 from django.urls import include, path
 
 from rest_framework_simplejwt.views import (
@@ -13,12 +13,14 @@ from drf_spectacular.views import (
     SpectacularSwaggerView,
 )
 
+
 urlpatterns = [
+    # Admin
     path("admin/", admin.site.urls),
 
     # Authentication
     path(
-        "api/auth/",
+        "api/accounts/",
         include("accounts.urls"),
     ),
 
@@ -35,44 +37,44 @@ urlpatterns = [
         name="token_verify",
     ),
 
-    # API Schema
+    # API documentation
     path(
         "api/schema/",
         SpectacularAPIView.as_view(),
         name="schema",
     ),
 
-    # Swagger Documentation
     path(
         "api/docs/",
-        SpectacularSwaggerView.as_view(url_name="schema"),
+        SpectacularSwaggerView.as_view(
+            url_name="schema"
+        ),
         name="swagger-ui",
     ),
 
-    # Events
+    # Application APIs
     path(
         "api/events/",
         include("events.urls"),
     ),
 
-    # Tickets
     path(
         "api/tickets/",
         include("tickets.urls"),
     ),
 
-    # Bookings
     path(
         "api/bookings/",
         include("bookings.urls"),
     ),
 
-    # Payments
     path(
         "api/payments/",
         include("payments.urls"),
     ),
 ]
+
+
 if settings.DEBUG:
     urlpatterns += static(
         settings.MEDIA_URL,

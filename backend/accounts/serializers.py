@@ -1,14 +1,16 @@
 from django.contrib.auth import authenticate
 from django.contrib.auth.password_validation import validate_password
+
 from rest_framework import serializers
 from rest_framework_simplejwt.tokens import RefreshToken
-from .models import User, Profile
 
-from .models import User
+from .models import User, Profile
 
 
 class RegisterSerializer(serializers.ModelSerializer):
-    confirm_password = serializers.CharField(write_only=True)
+    confirm_password = serializers.CharField(
+        write_only=True
+    )
 
     password = serializers.CharField(
         write_only=True,
@@ -27,8 +29,12 @@ class RegisterSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         if attrs["password"] != attrs["confirm_password"]:
             raise serializers.ValidationError(
-                {"confirm_password": "Passwords do not match."}
+                {
+                    "confirm_password":
+                    "Passwords do not match."
+                }
             )
+
         return attrs
 
     def create(self, validated_data):
@@ -40,11 +46,16 @@ class RegisterSerializer(serializers.ModelSerializer):
             password=validated_data["password"],
         )
 
+        Profile.objects.create(user=user)
+
         return user
+
 
 class LoginSerializer(serializers.Serializer):
     username = serializers.CharField()
-    password = serializers.CharField(write_only=True)
+    password = serializers.CharField(
+        write_only=True
+    )
 
     def validate(self, attrs):
         username = attrs.get("username")
@@ -58,6 +69,11 @@ class LoginSerializer(serializers.Serializer):
         if user is None:
             raise serializers.ValidationError(
                 "Invalid username or password."
+            )
+
+        if not user.is_active:
+            raise serializers.ValidationError(
+                "This account is inactive."
             )
 
         refresh = RefreshToken.for_user(user)
@@ -100,6 +116,14 @@ class ProfileSerializer(serializers.ModelSerializer):
             "county",
             "bio",
             "profile_image",
+            "created_at",
+            "updated_at",
+        ]
+
+        read_only_fields = [
+            "username",
+            "email",
+            "role",
             "created_at",
             "updated_at",
         ]

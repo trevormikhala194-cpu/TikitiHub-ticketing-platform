@@ -1,0 +1,17 @@
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+
+# Django
+*.sqlite3
+media/
+staticfiles/
+
+# Environment
+.env
+
+# Node
+node_modules/
+dist/

@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
 import { Link, useParams } from "react-router-dom";
-import axios from "axios";
 import "./EventDetails.css";
 
-const API_URL = "http://127.0.0.1:8000/api";
+import { getEvent } from "../services/events";
 
 function EventDetails() {
   const { id } = useParams();
@@ -15,14 +14,14 @@ function EventDetails() {
   useEffect(() => {
     const loadEvent = async () => {
       try {
-        const response = await axios.get(
-          `${API_URL}/events/${id}/`
-        );
+        setLoading(true);
+        setError("");
 
-        setEvent(response.data);
+        const data = await getEvent(id);
+        setEvent(data);
       } catch (err) {
-        console.error(err);
-        setError("Unable to load this event.");
+        console.error("Failed to load event:", err);
+        setError("Unable to load this event right now.");
       } finally {
         setLoading(false);
       }
@@ -36,7 +35,7 @@ function EventDetails() {
 
     return new Date(date).toLocaleDateString("en-KE", {
       weekday: "long",
-      day: "numeric",
+      day: "2-digit",
       month: "long",
       year: "numeric",
     });
@@ -46,45 +45,42 @@ function EventDetails() {
     if (!date) return "Time TBA";
 
     return new Date(date).toLocaleTimeString("en-KE", {
-      hour: "numeric",
+      hour: "2-digit",
       minute: "2-digit",
     });
   };
 
   const formatPrice = (price) => {
-    const value = Number(price);
+    const numericPrice = Number(price);
 
-    if (Number.isNaN(value)) {
+    if (Number.isNaN(numericPrice)) {
       return "Price TBA";
     }
 
-    return `KSh ${value.toLocaleString("en-KE")}`;
+    return `KSh ${numericPrice.toLocaleString("en-KE")}`;
   };
 
   if (loading) {
     return (
-      <div className="event-details-state">
-        <div className="loading-spinner"></div>
-        <p>Loading event...</p>
+      <div className="event-details-page">
+        <div className="event-details-message">
+          <p>Loading event...</p>
+        </div>
       </div>
     );
   }
 
   if (error || !event) {
     return (
-      <div className="event-details-state">
-        <div className="empty-icon">🎟</div>
+      <div className="event-details-page">
+        <div className="event-details-message error">
+          <h2>Event not found</h2>
+          <p>{error || "This event could not be found."}</p>
 
-        <h2>Event not found</h2>
-
-        <p>
-          {error ||
-            "The event you are looking for does not exist."}
-        </p>
-
-        <Link to="/events" className="back-button">
-          ← Back to Events
-        </Link>
+          <Link to="/events" className="back-button">
+            ← Back to Events
+          </Link>
+        </div>
       </div>
     );
   }
@@ -92,139 +88,178 @@ function EventDetails() {
   return (
     <div className="event-details-page">
 
-      {/* Hero Image */}
-      <section className="event-details-hero">
-        {event.banner_image ? (
-          <img
-            src={event.banner_image}
-            alt={event.title}
-          />
-        ) : (
-          <div className="event-details-placeholder">
-            <span>🎟</span>
-            <p>TIKITIHUB</p>
-          </div>
-        )}
-
-        <div className="hero-overlay"></div>
-
-        <Link
-          to="/events"
-          className="back-link"
-        >
-          ← All Events
+      {/* Back navigation */}
+      <div className="event-details-container">
+        <Link to="/events" className="back-link">
+          ← Back to Events
         </Link>
-      </section>
+      </div>
 
-      {/* Main Content */}
-      <main className="event-details-content">
+      {/* Event Hero */}
+      <section className="event-details-hero">
+        <div className="event-details-container">
 
-        <div className="event-details-main">
-
-          <span className="event-details-label">
-            TIKITIHUB EVENT
-          </span>
-
-          <h1>{event.title}</h1>
-
-          <p className="event-description-large">
-            {event.description ||
-              "Get ready for an unforgettable experience."}
-          </p>
-
-          <div className="event-information">
-
-            <div className="information-item">
-              <span className="information-icon">
-                📅
-              </span>
-
-              <div>
-                <small>DATE</small>
-                <strong>
-                  {formatDate(event.start_datetime)}
-                </strong>
+          <div className="event-banner">
+            {event.banner_image ? (
+              <img
+                src={event.banner_image}
+                alt={event.title}
+              />
+            ) : (
+              <div className="event-banner-placeholder">
+                <span>🎟</span>
+                <p>TIKITIHUB EVENT</p>
               </div>
-            </div>
-
-            <div className="information-item">
-              <span className="information-icon">
-                🕐
-              </span>
-
-              <div>
-                <small>TIME</small>
-                <strong>
-                  {formatTime(event.start_datetime)}
-                </strong>
-              </div>
-            </div>
-
-            <div className="information-item">
-              <span className="information-icon">
-                📍
-              </span>
-
-              <div>
-                <small>VENUE</small>
-                <strong>
-                  Venue #{event.venue}
-                </strong>
-              </div>
-            </div>
-
-          </div>
-
-          <div className="event-about">
-            <h2>About this event</h2>
-
-            <p>
-              {event.description ||
-                "More information about this event will be available soon."}
-            </p>
+            )}
           </div>
 
         </div>
+      </section>
 
-        {/* Ticket Card */}
-        <aside className="ticket-purchase-card">
+      {/* Event Information */}
+      <main className="event-details-container">
+        <section className="event-information">
 
-          <span className="ticket-card-label">
-            YOUR TICKET
+          <div className="event-main-content">
+
+            <span className="event-details-label">
+              TIKITIHUB EVENT
+            </span>
+
+            <h1>{event.title}</h1>
+
+            <p className="event-description">
+              {event.description ||
+                "Experience an unforgettable event with TikitiHub."}
+            </p>
+
+            <div className="event-meta-grid">
+
+              <div className="event-meta-card">
+                <span className="meta-icon">📅</span>
+
+                <div>
+                  <small>DATE</small>
+                  <strong>
+                    {formatDate(event.start_datetime)}
+                  </strong>
+                </div>
+              </div>
+
+              <div className="event-meta-card">
+                <span className="meta-icon">⏰</span>
+
+                <div>
+                  <small>TIME</small>
+                  <strong>
+                    {formatTime(event.start_datetime)}
+                  </strong>
+                </div>
+              </div>
+
+              <div className="event-meta-card">
+                <span className="meta-icon">📍</span>
+
+                <div>
+                  <small>LOCATION</small>
+                  <strong>
+                    Kenya
+                  </strong>
+                </div>
+              </div>
+
+              <div className="event-meta-card">
+                <span className="meta-icon">🎟</span>
+
+                <div>
+                  <small>CAPACITY</small>
+                  <strong>
+                    {event.capacity?.toLocaleString("en-KE") ||
+                      "TBA"}
+                  </strong>
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+          {/* Ticket Card */}
+          <aside className="ticket-purchase-card">
+
+            <span className="ticket-card-label">
+              TICKET
+            </span>
+
+            <h2>
+              {formatPrice(event.ticket_price)}
+            </h2>
+
+            <p>
+              per ticket
+            </p>
+
+            <div className="ticket-card-divider" />
+
+            <div className="ticket-status">
+              <span
+                className={`status-dot ${
+                  event.status === "PUBLISHED"
+                    ? "active"
+                    : ""
+                }`}
+              />
+
+              <span>
+                {event.status === "PUBLISHED"
+                  ? "Tickets available"
+                  : "Tickets unavailable"}
+              </span>
+            </div>
+
+            {event.status === "PUBLISHED" ? (
+            <Link
+             to={`/events/${event.id}/book`}
+             className="book-ticket-button"
+              >
+              Get Your Ticket →
+             </Link>
+             ) : (
+             <button
+              className="book-ticket-button"
+              disabled
+              >
+              Not Available
+             </button>
+              )}
+
+            <small className="secure-note">
+              🔒 Secure booking with TikitiHub
+            </small>
+
+          </aside>
+
+        </section>
+
+        {/* Organizer */}
+        <section className="organizer-section">
+
+          <span className="event-details-label">
+            ORGANIZED BY
           </span>
 
           <h2>
-            Ready to experience
-            <br />
-            <span>{event.title}?</span>
+            {event.organizer || "TikitiHub Organizer"}
           </h2>
 
-          <div className="ticket-price">
-            <small>FROM</small>
-
-            <strong>
-              {formatPrice(event.ticket_price)}
-            </strong>
-          </div>
-
-          <div className="ticket-capacity">
-            <span>🎟 Available tickets</span>
-            <strong>
-              {event.capacity?.toLocaleString() || "N/A"}
-            </strong>
-          </div>
-
-          <button className="get-ticket-button">
-            Get Your Ticket →
-          </button>
-
-          <p className="secure-note">
-            🔒 Secure booking through TikitiHub
+          <p>
+            This event is proudly listed on TikitiHub.
           </p>
 
-        </aside>
+        </section>
 
       </main>
+
     </div>
   );
 }

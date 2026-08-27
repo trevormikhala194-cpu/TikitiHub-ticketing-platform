@@ -6,16 +6,17 @@ from .models import Booking
 class BookingSerializer(serializers.ModelSerializer):
 
     customer = serializers.StringRelatedField(
-        read_only=True,
+        read_only=True
     )
 
     event_title = serializers.CharField(
         source="event.title",
-        read_only=True,
+        read_only=True
     )
 
     class Meta:
         model = Booking
+
         fields = (
             "id",
             "customer",
@@ -42,4 +43,10 @@ class BookingSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError(
                 "Quantity must be greater than zero."
             )
+
+        if value > 20:
+            raise serializers.ValidationError(
+                "You can book a maximum of 20 tickets at once."
+            )
+
         return value
