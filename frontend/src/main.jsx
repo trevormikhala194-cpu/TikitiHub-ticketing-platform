@@ -13,65 +13,82 @@ import Booking from "./pages/Booking";
 import Login from "./pages/Login";
 import Register from "./pages/Register";
 
+import { AuthProvider } from "./context/AuthContext";
+
 import "./index.css";
 
-createRoot(document.getElementById("root")).render(
+
+createRoot(
+  document.getElementById("root")
+).render(
+
   <StrictMode>
+
     <BrowserRouter>
-      <Routes>
 
-        {/* =========================
-            PUBLIC PAGES
-        ========================== */}
+      <AuthProvider>
 
-        <Route
-          path="/"
-          element={<Home />}
-        />
+        <Routes>
 
-        <Route
-          path="/events"
-          element={<Events />}
-        />
+          {/* =========================
+              PUBLIC PAGES
+          ========================== */}
 
-        <Route
-          path="/events/:id"
-          element={<EventDetails />}
-        />
+          <Route
+            path="/"
+            element={<Home />}
+          />
 
-        {/* =========================
-            BOOKING
-        ========================== */}
+          <Route
+            path="/events"
+            element={<Events />}
+          />
 
-        <Route
-          path="/events/:id/book"
-          element={<Booking />}
-        />
+          <Route
+            path="/events/:id"
+            element={<EventDetails />}
+          />
 
-        {/* =========================
-            AUTHENTICATION
-        ========================== */}
 
-        <Route
-          path="/login"
-          element={<Login />}
-        />
+          {/* =========================
+              BOOKING
+          ========================== */}
 
-        <Route
-          path="/register"
-          element={<Register />}
-        />
+          <Route
+            path="/events/:id/book"
+            element={<Booking />}
+          />
 
-        {/* =========================
-            FALLBACK
-        ========================== */}
 
-        <Route
-          path="*"
-          element={<Home />}
-        />
+          {/* =========================
+              AUTHENTICATION
+          ========================== */}
 
-      </Routes>
+          <Route
+            path="/login"
+            element={<Login />}
+          />
+
+          <Route
+            path="/register"
+            element={<Register />}
+          />
+
+
+          {/* =========================
+              FALLBACK
+          ========================== */}
+
+          <Route
+            path="*"
+            element={<Home />}
+          />
+
+        </Routes>
+
+      </AuthProvider>
+
     </BrowserRouter>
+
   </StrictMode>
 );

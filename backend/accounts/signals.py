@@ -1,5 +1,3 @@
-print("Accounts signals loaded")
-
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 
@@ -11,14 +9,19 @@ def create_user_profile(sender, instance, created, **kwargs):
     """
     Automatically create a profile whenever a new user is created.
     """
+
     if created:
-        print(f"Signal fired for {instance.username}")
-        Profile.objects.create(user=instance)
+        Profile.objects.get_or_create(
+            user=instance
+        )
 
 
 @receiver(post_save, sender=User)
 def save_user_profile(sender, instance, **kwargs):
     """
-    Save the related profile whenever the user is saved.
+    Save the user's profile whenever the user is saved.
     """
-    instance.profile.save()
+
+    Profile.objects.get_or_create(
+        user=instance
+    )

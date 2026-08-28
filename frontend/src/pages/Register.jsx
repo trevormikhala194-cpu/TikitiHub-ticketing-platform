@@ -4,255 +4,494 @@ import {
   useNavigate,
 } from "react-router-dom";
 
-import { registerUser } from "../services/auth";
+import { useAuth } from "../context/AuthContext";
+
+import {
+  requestOTP,
+  verifyOTP,
+} from "../services/auth";
+
+import { saveAuth } from "../utils/auth";
 
 import "./Auth.css";
+
 
 function Register() {
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    username: "",
-    email: "",
-    password: "",
-    confirm_password: "",
-  });
+  const { login } = useAuth();
+
+  const [step, setStep] = useState(1);
+
+  const [identifier, setIdentifier] = useState("");
+  const [otpCode, setOtpCode] = useState("");
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
-  const [success, setSuccess] = useState("");
+  const [message, setMessage] = useState("");
 
-  const handleChange = (event) => {
-    const { name, value } = event.target;
+  const [developmentOTP, setDevelopmentOTP] =
+    useState("");
 
-    setFormData((current) => ({
-      ...current,
-      [name]: value,
-    }));
-  };
 
-  const handleSubmit = async (event) => {
+  // =========================
+  // REQUEST REGISTRATION OTP
+  // =========================
+
+  const handleRequestOTP = async (event) => {
     event.preventDefault();
 
     setError("");
-    setSuccess("");
+    setMessage("");
+    setDevelopmentOTP("");
 
-    if (
-      !formData.username ||
-      !formData.email ||
-      !formData.password ||
-      !formData.confirm_password
-    ) {
+    const value = identifier.trim();
+
+    if (!value) {
       setError(
-        "Please complete all fields."
+        "Please enter your email or phone number."
       );
-
       return;
     }
 
-    if (
-      formData.password !==
-      formData.confirm_password
-    ) {
-      setError(
-        "Passwords do not match."
-      );
-
-      return;
-    }
+    setLoading(true);
 
     try {
-      setLoading(true);
-
-      await registerUser(formData);
-
-      setSuccess(
-        "Account created successfully. Redirecting to login..."
+      const data = await requestOTP(
+        value,
+        "REGISTRATION"
       );
 
-      setTimeout(() => {
-        navigate("/login");
-      }, 1200);
+      setIdentifier(data.identifier);
+
+      setDevelopmentOTP(
+        data.development_otp || ""
+      );
+
+      setMessage(
+        "OTP sent successfully. Check your email or phone."
+      );
+
+      setStep(2);
 
     } catch (err) {
       console.error(
-        "Registration failed:",
+        "Failed to request registration OTP:",
         err
       );
 
-      const data = err?.response?.data;
+      const responseData =
+        err?.response?.data;
 
-      if (data && typeof data === "object") {
-        const firstError =
-          Object.values(data)
-            .flat()
-            .find(
-              (message) =>
-                typeof message === "string"
-            );
+      if (responseData?.identifier) {
+        const identifierError =
+          responseData.identifier;
 
         setError(
-          firstError ||
-            "Unable to create your account."
+          Array.isArray(identifierError)
+            ? identifierError[0]
+            : identifierError
         );
+
+      } else if (responseData?.detail) {
+        setError(responseData.detail);
+
       } else {
         setError(
-          "Unable to create your account."
+          "Unable to send OTP. Please try again."
         );
       }
+
     } finally {
       setLoading(false);
     }
   };
 
-  return (
-    <main className="auth-page">
 
-      <div className="auth-card">
+  // =========================
+  // VERIFY REGISTRATION OTP
+  // =========================
+
+  const handleVerifyOTP = async (event) => {
+    event.preventDefault();
+
+    setError("");
+    setMessage("");
+
+    const code = otpCode.trim();
+
+    if (!code) {
+      setError("Please enter the OTP.");
+      return;
+    }
+
+    if (!/^\d{6}$/.test(code)) {
+      setError(
+        "OTP must contain exactly 6 digits."
+      );
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const data = await verifyOTP(
+        identifier,
+        code,
+        "REGISTRATION"
+      );
+
+      // =========================
+      // SAVE AUTHENTICATION
+      // =========================
+
+      saveAuth(data);
+
+      // =========================
+      // UPDATE GLOBAL AUTH STATE
+      // =========================
+
+      login(data);
+
+      setMessage(
+        "Account created successfully!"
+      );
+
+      // =========================
+      // REDIRECT
+      // =========================
+
+      setTimeout(() => {
+        navigate("/", {
+          replace: true,
+        });
+      }, 800);
+
+    } catch (err) {
+      console.error(
+        "Failed to verify registration OTP:",
+        err
+      );
+
+      const responseData =
+        err?.response?.data;
+
+      if (responseData?.detail) {
+        setError(responseData.detail);
+
+      } else if (responseData?.otp_code) {
+        const otpError =
+          responseData.otp_code;
+
+        setError(
+          Array.isArray(otpError)
+            ? otpError[0]
+            : otpError
+        );
+
+      } else {
+        setError(
+          "Unable to verify OTP. Please try again."
+        );
+      }
+
+    } finally {
+      setLoading(false);
+    }
+  };
+
+
+  // =========================
+  // CHANGE EMAIL / PHONE
+  // =========================
+
+  const handleChangeIdentifier = () => {
+    setStep(1);
+    setOtpCode("");
+    setError("");
+    setMessage("");
+    setDevelopmentOTP("");
+  };
+
+
+  return (
+    <div className="auth-page">
+
+      <div className="auth-container">
+
+        {/* =========================
+            BRAND
+        ========================== */}
 
         <Link
           to="/"
           className="auth-logo"
         >
-          🎟 Tikiti<span>Hub</span>
-        </Link>
 
-        <div className="auth-header">
-
-          <span className="section-label">
-            JOIN TIKITIHUB
+          <span className="logo-icon">
+            🎟
           </span>
 
-          <h1>Create your account</h1>
+          <span>
+            Tikiti<span>Hub</span>
+          </span>
 
-          <p>
-            Create an account and start
-            booking unforgettable experiences.
-          </p>
+        </Link>
+
+
+        {/* =========================
+            CARD
+        ========================== */}
+
+        <div className="auth-card">
+
+          {/* =========================
+              STEP 1
+          ========================== */}
+
+          {step === 1 && (
+            <>
+
+              <div className="auth-header">
+
+                <span className="section-label">
+                  JOIN TIKITIHUB
+                </span>
+
+                <h1>
+                  Create your account
+                </h1>
+
+                <p>
+                  Register using your email
+                  address or phone number.
+                </p>
+
+              </div>
+
+
+              <form
+                className="auth-form"
+                onSubmit={handleRequestOTP}
+              >
+
+                <div className="form-group">
+
+                  <label htmlFor="identifier">
+                    Email or phone number
+                  </label>
+
+                  <input
+                    id="identifier"
+                    type="text"
+                    value={identifier}
+                    onChange={(event) =>
+                      setIdentifier(
+                        event.target.value
+                      )
+                    }
+                    placeholder="Email or phone number"
+                    autoComplete="email"
+                    disabled={loading}
+                  />
+
+                </div>
+
+
+                {error && (
+                  <div className="auth-error">
+                    {error}
+                  </div>
+                )}
+
+
+                <button
+                  type="submit"
+                  className="auth-submit"
+                  disabled={loading}
+                >
+                  {loading
+                    ? "Sending OTP..."
+                    : "Continue →"}
+                </button>
+
+              </form>
+
+
+              <div className="auth-footer">
+
+                <span>
+                  Already have an account?
+                </span>
+
+                <Link to="/login">
+                  Login
+                </Link>
+
+              </div>
+
+            </>
+          )}
+
+
+          {/* =========================
+              STEP 2
+          ========================== */}
+
+          {step === 2 && (
+            <>
+
+              <div className="auth-header">
+
+                <span className="section-label">
+                  VERIFY ACCOUNT
+                </span>
+
+                <h1>
+                  Enter your OTP
+                </h1>
+
+                <p>
+                  Enter the 6-digit code sent
+                  to:
+                </p>
+
+                <strong className="auth-identifier">
+                  {identifier}
+                </strong>
+
+              </div>
+
+
+              <form
+                className="auth-form"
+                onSubmit={handleVerifyOTP}
+              >
+
+                <div className="form-group">
+
+                  <label htmlFor="otp">
+                    Verification code
+                  </label>
+
+                  <input
+                    id="otp"
+                    type="text"
+                    inputMode="numeric"
+                    maxLength={6}
+                    value={otpCode}
+                    onChange={(event) =>
+                      setOtpCode(
+                        event.target.value.replace(
+                          /\D/g,
+                          ""
+                        )
+                      )
+                    }
+                    placeholder="000000"
+                    autoComplete="one-time-code"
+                    disabled={loading}
+                  />
+
+                </div>
+
+
+                {message && (
+                  <div className="auth-success">
+                    {message}
+                  </div>
+                )}
+
+
+                {error && (
+                  <div className="auth-error">
+                    {error}
+                  </div>
+                )}
+
+
+                {/* =========================
+                    DEVELOPMENT ONLY
+                ========================== */}
+
+                {developmentOTP && (
+                  <div className="development-otp">
+
+                    <span>
+                      Development OTP
+                    </span>
+
+                    <strong>
+                      {developmentOTP}
+                    </strong>
+
+                  </div>
+                )}
+
+
+                <button
+                  type="submit"
+                  className="auth-submit"
+                  disabled={
+                    loading ||
+                    otpCode.length !== 6
+                  }
+                >
+                  {loading
+                    ? "Verifying..."
+                    : "Verify & Create Account"}
+                </button>
+
+              </form>
+
+
+              <div className="otp-actions">
+
+                <button
+                  type="button"
+                  onClick={
+                    handleChangeIdentifier
+                  }
+                  disabled={loading}
+                >
+                  ← Change email/phone
+                </button>
+
+              </div>
+
+
+              <div className="auth-footer">
+
+                <span>
+                  Already have an account?
+                </span>
+
+                <Link to="/login">
+                  Login
+                </Link>
+
+              </div>
+
+            </>
+          )}
 
         </div>
 
-        {error && (
-          <div className="auth-error">
-            {error}
-          </div>
-        )}
 
-        {success && (
-          <div className="auth-success">
-            {success}
-          </div>
-        )}
+        {/* =========================
+            SECURITY NOTE
+        ========================== */}
 
-        <form
-          className="auth-form"
-          onSubmit={handleSubmit}
-        >
-
-          <div className="form-group">
-
-            <label htmlFor="username">
-              Username
-            </label>
-
-            <input
-              id="username"
-              name="username"
-              type="text"
-              value={formData.username}
-              onChange={handleChange}
-              placeholder="Choose a username"
-              autoComplete="username"
-            />
-
-          </div>
-
-          <div className="form-group">
-
-            <label htmlFor="email">
-              Email
-            </label>
-
-            <input
-              id="email"
-              name="email"
-              type="email"
-              value={formData.email}
-              onChange={handleChange}
-              placeholder="you@example.com"
-              autoComplete="email"
-            />
-
-          </div>
-
-          <div className="form-group">
-
-            <label htmlFor="password">
-              Password
-            </label>
-
-            <input
-              id="password"
-              name="password"
-              type="password"
-              value={formData.password}
-              onChange={handleChange}
-              placeholder="Create a password"
-              autoComplete="new-password"
-            />
-
-          </div>
-
-          <div className="form-group">
-
-            <label htmlFor="confirm_password">
-              Confirm password
-            </label>
-
-            <input
-              id="confirm_password"
-              name="confirm_password"
-              type="password"
-              value={
-                formData.confirm_password
-              }
-              onChange={handleChange}
-              placeholder="Repeat your password"
-              autoComplete="new-password"
-            />
-
-          </div>
-
-          <button
-            type="submit"
-            className="auth-submit"
-            disabled={loading}
-          >
-            {loading
-              ? "Creating account..."
-              : "Create Account →"}
-          </button>
-
-        </form>
-
-        <p className="auth-switch">
-          Already have an account?{" "}
-          <Link to="/login">
-            Login
-          </Link>
+        <p className="auth-security">
+          🔒 Your information is securely
+          handled by TikitiHub.
         </p>
-
-        <Link
-          to="/events"
-          className="auth-back"
-        >
-          ← Browse Events
-        </Link>
 
       </div>
 
-    </main>
+    </div>
   );
 }
+
 
 export default Register;
